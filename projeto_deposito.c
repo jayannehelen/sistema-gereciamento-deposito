@@ -361,19 +361,36 @@ void consultarProdutoNome(char *nome){
     Produto *aux = inicioProduto;
     int existe = 0;
 
+    // 1. Cria uma cópia da palavra buscada e converte para minúsculo
+    char buscaMin[100];
+    strcpy(buscaMin, nome);
+    for(int i = 0; buscaMin[i] != '\0'; i++){
+        buscaMin[i] = tolower(buscaMin[i]);
+    }
+
     while(aux != NULL){
-        if(strstr(aux->nomeProduto, nome) != NULL){
+    
+        char nomeProdutoMin[100];
+        strcpy(nomeProdutoMin, aux->nomeProduto);
+        
+        for(int i = 0; nomeProdutoMin[i] != '\0'; i++){
+            nomeProdutoMin[i] = tolower(nomeProdutoMin[i]);
+        }
+
+
+        if(strstr(nomeProdutoMin, buscaMin) != NULL){
             printf("Codigo: %d\n", aux->codProduto);
-            printf("Nome: %s\n", aux->nomeProduto);
-            printf("Preco: %.2f\n", aux->precoProduto);
+            printf("Nome: %s\n", aux->nomeProduto); 
+            printf("Preco: R$ %.2f\n", aux->precoProduto);
             printf("Quantidade: %d\n\n", aux->qntProduto);
 
             existe = 1;
         }
         aux = aux->prox;
     }
+    
     if(!existe){
-        printf("Nenhum produto encontrado.\n");
+        printf("Nenhum produto encontrado com o termo '%s'.\n", nome);
     }
 }
 
@@ -687,8 +704,8 @@ void gerenciamentoProdutos(){
                             if (scanf("%d", &limInferior) != 1) {
                                 printf("Erro: Digite apenas numeros.\n");
 
-                                while (getchar() != '\n'); // limpa o buffer
-                                limInferior = -1;          // força repetir o loop
+                                while (getchar() != '\n'); 
+                                limInferior = -1;          
                             }
                         } while (limInferior <=0);
                         
@@ -697,8 +714,8 @@ void gerenciamentoProdutos(){
                             if (scanf("%d", &limSuperior) != 1) {
                                 printf("Erro: Digite apenas numeros.\n");
 
-                                while (getchar() != '\n'); // limpa o buffer
-                                limSuperior = -1;          // força repetir o loop
+                                while (getchar() != '\n'); 
+                                limSuperior = -1;          
                             }
                         } while (limSuperior <=0 || limSuperior < limInferior);
 
