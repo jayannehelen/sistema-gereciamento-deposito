@@ -31,6 +31,8 @@ Funcionario *inicio_funcionarios = NULL;
 Funcionario *fim_funcionarios = NULL;
 int qtdFuncionarios = 0;
 
+int estoqueMinimo = 2;
+
 // PRODUTO 
 Produto * buscarProduto(int cod){
     Produto * aux = inicioProduto;
@@ -105,29 +107,93 @@ void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, 
 }
 
 // RF002.1 (falta atualizacao - aumentar quantidade estoque)
-void saidaEstoque(int cod, int quantidade){
+void saidaEstoque(int cod){
+    int qtdTemp;
 
     printf("\n-------------------| RETIRAR DO ESTOQUE |-------------------\n");
-    Produto *aux = buscarProduto(cod);;
+    Produto *aux = buscarProduto(cod);
     if (aux == NULL){
         printf("Produto %d inexistente no estoque.\n", cod);
     } else {
-        if (quantidade > aux->qntProduto) {
+        
+        printf("\n | PRODUTO | \n");
+        printf("Codigo: %d \n", aux->codProduto);
+        printf("Nome: %s \n", aux->nomeProduto);
+        printf("Descricao: %s \n", aux->descricaoProduto);
+        printf("Preco: R$ %.2lf \n", aux->precoProduto);
+        printf("Quantidade: %d \n", aux->qntProduto);
+
+        printf("\nDigite quantos desse produto voce deseja retirar: ");
+        while (scanf("%d", &qtdTemp) != 1) {
+            printf("\nErro: Digite apenas numeros.\n");
+
+            while (getchar() != '\n');
+
+            printf("Digite quantos desse produto voce deseja retirar: ");
+        }
+
+        if (qtdTemp > aux->qntProduto) {
             printf("AVISO: IMPOSSIVEL RETIRADA DE ESTOQUE!\n");
             printf("A quantidade de estoque do produto e maior que a quantidade selecionada.\n");
         } else {
-            aux->qntProduto -= quantidade;
-            printf("Agora o estoque de %s e %d produtos\n", aux->nomeProduto, aux->qntProduto);
+            aux->qntProduto -= qtdTemp;
+            // printf("Agora o estoque de %s e %d produtos\n", aux->nomeProduto, aux->qntProduto);
+
+            printf("\n | PRODUTO | \n");
+            printf("Codigo: %d \n", aux->codProduto);
+            printf("Nome: %s \n", aux->nomeProduto);
+            printf("Descricao: %s \n", aux->descricaoProduto);
+            printf("Preco: R$ %.2lf \n", aux->precoProduto);
+            printf("Quantidade: %d \n", aux->qntProduto);
 
             // RF005
-            int estoqueMinimo = 2;
             if (aux->qntProduto <= estoqueMinimo){
-                printf("\n-------------------| AVISO!!!!!! |-------------------\n");
+                printf("\n-------------------| AVISO IMPORTANTE |-------------------\n");
                 printf("Ponto minimo de reabastecimento alcancado!\n");
                 printf("Produto %s (codigo %d) com apenas %d em estoque.\n", aux->nomeProduto, aux->codProduto, aux->qntProduto);
             }
             
         }
+    }
+}
+
+void atualizarEstoqueProduto(int codTemp){
+    printf("\n-------------------| ATUALIZAR ESTOQUE |-------------------\n");
+    
+    int qtdTemp;
+    
+    Produto * aux = buscarProduto(codTemp);
+
+    if (aux == NULL) {
+        printf("Produto %d inexistente no estoque.\n", codTemp);
+    } else {
+        
+        printf("\n | PRODUTO | \n");
+        printf("Codigo: %d \n", aux->codProduto);
+        printf("Nome: %s \n", aux->nomeProduto);
+        printf("Descricao: %s \n", aux->descricaoProduto);
+        printf("Preco: R$ %.2lf \n", aux->precoProduto);
+        printf("Quantidade: %d \n", aux->qntProduto);
+
+        printf("\nDigite quantas unidades voce deseja adicionar: ");
+        while (scanf("%d", &qtdTemp) != 1) {
+            printf("\nErro: Digite apenas numeros.\n");
+
+            while (getchar() != '\n');
+
+            printf("Digite quantas unidades voce deseja adicionar: ");
+        }
+
+        aux->qntProduto += qtdTemp;
+
+        printf("Estoque atualizado com sucesso!\n");
+
+        printf("\n | PRODUTO | \n");
+        printf("Codigo: %d \n", aux->codProduto);
+        printf("Nome: %s \n", aux->nomeProduto);
+        printf("Descricao: %s \n", aux->descricaoProduto);
+        printf("Preco: R$ %.2lf \n", aux->precoProduto);
+        printf("Quantidade: %d \n", aux->qntProduto);
     }
 }
 
@@ -140,7 +206,7 @@ void listarTodosProdutos(){
         printf("Codigo: %d \n", aux->codProduto);
         printf("Nome: %s \n", aux->nomeProduto);
         printf("Descricao: %s \n", aux->descricaoProduto);
-        printf("Preco: %.2lf \n", aux->precoProduto);
+        printf("Preco: R$ %.2lf \n", aux->precoProduto);
         printf("Quantidade: %d \n", aux->qntProduto);
         printf("\n");
         //... fazer os demais dados
@@ -154,7 +220,7 @@ void listarTodosProdutos(){
 
 void listarProdutosDisponiveisPreco(double limiteI, double limiteS){
     printf("\n-------------------| VER PRODUTOS |-------------------\n");
-    printf("Filtrado por preco: %.2lf - %.2lf\n", limiteI, limiteS);
+    printf("Filtrado por Preco: R$ %.2lf - %.2lf\n", limiteI, limiteS);
 
     Produto * aux = inicioProduto;
     int contador=0;
@@ -165,7 +231,7 @@ void listarProdutosDisponiveisPreco(double limiteI, double limiteS){
             printf("Codigo: %d \n", aux->codProduto);
             printf("Nome: %s \n", aux->nomeProduto);
             printf("Descricao: %s \n", aux->descricaoProduto);
-            printf("Preco: %.2lf \n", aux->precoProduto);
+            printf("Preco: R$ %.2lf \n", aux->precoProduto);
             printf("Quantidade: %d \n", aux->qntProduto);
             printf("\n");
         }
@@ -191,7 +257,7 @@ void listarProdutosDisponiveisCodigo(int codMenor, int codMaior){
             printf("Codigo: %d \n", aux->codProduto);
             printf("Nome: %s \n", aux->nomeProduto);
             printf("Descricao: %s \n", aux->descricaoProduto);
-            printf("Preco: %.2lf \n", aux->precoProduto);
+            printf("Preco: R$ %.2lf \n", aux->precoProduto);
             printf("Quantidade: %d \n", aux->qntProduto);
             printf("\n");
         }
@@ -205,7 +271,7 @@ void listarProdutosDisponiveisCodigo(int codMenor, int codMaior){
 }
 
 // RF003
-Produto * consultarProdutoCodigo(int cod){
+void consultarProdutoCodigo(int cod){
     printf("\n-------------------| CONSULTA DE PRODUTO |-------------------\n");
     printf("Consulta por codigo: %d\n\n", cod);
 
@@ -217,11 +283,9 @@ Produto * consultarProdutoCodigo(int cod){
         printf("Codigo: %d \n", aux->codProduto);
         printf("Nome: %s \n", aux->nomeProduto);
         printf("Descricao: %s \n", aux->descricaoProduto);
-        printf("Preco: %.2lf \n", aux->precoProduto);
+        printf("Preco: R$ %.2lf \n", aux->precoProduto);
         printf("Quantidade: %d \n", aux->qntProduto);
     }
-
-    return aux;
 }
 
 void consultarProdutoNome(char *nome){
@@ -244,28 +308,6 @@ void consultarProdutoNome(char *nome){
     }
     if(!existe){
         printf("Nenhum produto encontrado.\n");
-    }
-}
-
-void atualizarEstoqueProduto(int codTemp){
-    int qtdTemp;
-    
-    Produto * aux = consultarProdutoCodigo(codTemp);
-
-    if (aux != NULL) {
-        printf("\nDigite a nova quantidade: ");
-        scanf("%d", &qtdTemp);
-
-        aux->qntProduto += qtdTemp;
-
-        printf("Estoque atualizado com sucesso!\n");
-
-        printf("\n-------------------| PRODUTO |-------------------\n");
-        printf("Codigo: %d \n", aux->codProduto);
-        printf("Nome: %s \n", aux->nomeProduto);
-        printf("Descricao: %s \n", aux->descricaoProduto);
-        printf("Preco: %.2lf \n", aux->precoProduto);
-        printf("Quantidade: %d \n", aux->qntProduto);
     }
 }
 
@@ -580,7 +622,7 @@ void gerenciamentoProdutos(){
 
             // preco
             while (1) {
-                printf("Digite o preco do produto: ");
+                printf("Digite o preco do produto (R$): ");
 
                 if (scanf("%f", &precoTemp) == 1 && precoTemp >= 0) {
                     while (getchar() != '\n');
@@ -668,6 +710,7 @@ void gerenciamentoProdutos(){
         
         case 4: {
         // atualizar estoque
+            printf("\n-------------------| ATUALIZACAO DE ESTOQUE |-------------------\n");
             int codTemp;
 
             printf("\nDigite o codigo do produto que pretende alterar a quantidade: ");
@@ -683,8 +726,22 @@ void gerenciamentoProdutos(){
             }
             break;
 
-        case 5: 
+        case 5: {
         // saida de estoque
+            printf("\n-------------------| SAIDA DE ESTOQUE |-------------------\n");
+
+            int codTemp;
+ 
+            printf("\nDigite o codigo do produto que deseja retirar: ");
+            while (scanf("%d", &codTemp) != 1) {
+                printf("\nErro: Digite apenas numeros.\n");
+
+                while (getchar() != '\n');
+
+                printf("Digite o codigo do produto que deseja retirar: ");
+            }
+            saidaEstoque(codTemp);
+        }
             break;
 
         case 6:
