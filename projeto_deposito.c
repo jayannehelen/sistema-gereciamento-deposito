@@ -359,37 +359,54 @@ void consultarProdutoNome(char *nome){
     printf("Consulta por nome: %s\n\n", nome);
 
     Produto *aux = inicioProduto;
-    int existe = 0;
+    int encontrouAlgum = 0;
 
-    // 1. Cria uma cópia da palavra buscada e converte para minúsculo
     char buscaMin[100];
     strcpy(buscaMin, nome);
+
     for(int i = 0; buscaMin[i] != '\0'; i++){
-        buscaMin[i] = tolower(buscaMin[i]);
+        buscaMin[i] = tolower((unsigned char)buscaMin[i]);
     }
 
     while(aux != NULL){
-    
+
         char nomeProdutoMin[100];
         strcpy(nomeProdutoMin, aux->nomeProduto);
-        
+
         for(int i = 0; nomeProdutoMin[i] != '\0'; i++){
-            nomeProdutoMin[i] = tolower(nomeProdutoMin[i]);
+            nomeProdutoMin[i] = tolower((unsigned char)nomeProdutoMin[i]);
         }
 
+        int encontrouProduto = 0;
 
-        if(strstr(nomeProdutoMin, buscaMin) != NULL){
+        char copiaNome[100];
+        strcpy(copiaNome, nomeProdutoMin);
+
+        char *palavra = strtok(copiaNome, " ");
+
+        while(palavra != NULL){
+
+            if(strncmp(palavra, buscaMin, strlen(buscaMin)) == 0){
+                encontrouProduto = 1;
+                break;
+            }
+
+            palavra = strtok(NULL, " ");
+        }
+
+        if(encontrouProduto){
             printf("Codigo: %d\n", aux->codProduto);
-            printf("Nome: %s\n", aux->nomeProduto); 
+            printf("Nome: %s\n", aux->nomeProduto);
             printf("Preco: R$ %.2f\n", aux->precoProduto);
             printf("Quantidade: %d\n\n", aux->qntProduto);
 
-            existe = 1;
+            encontrouAlgum = 1;
         }
+
         aux = aux->prox;
     }
-    
-    if(!existe){
+
+    if(!encontrouAlgum){
         printf("Nenhum produto encontrado com o termo '%s'.\n", nome);
     }
 }
