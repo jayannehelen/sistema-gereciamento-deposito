@@ -277,6 +277,65 @@ void listarProdutosDisponiveisCodigo(int codMenor, int codMaior){
     }
 }
 
+void relatorioInventario(){
+    printf("\n-------------------| RELATORIO DE INVENTARIO |-------------------\n");
+
+    Produto * aux = inicioProduto;
+    int totalItens = 0;
+    int totalQuantidade = 0;
+    float valorTotal = 0;
+
+    while(aux != NULL){
+        printf("Codigo: %d \n", aux->codProduto);
+        printf("Nome: %s \n", aux->nomeProduto);
+        printf("Quantidade: %d \n", aux->qntProduto);
+        printf("Preco: R$ %.2lf \n", aux->precoProduto);
+        printf("Valor em estoque: R$ %.2lf \n", aux->precoProduto * aux->qntProduto);
+        printf("\n");
+
+        totalItens += 1;
+        totalQuantidade += aux->qntProduto;
+        valorTotal += aux->precoProduto * aux->qntProduto;
+
+        aux = aux->prox;
+    }
+
+    if (totalItens == 0) {
+        printf("Nao ha produtos cadastrados.\n");
+    } else {
+        printf("-------------------------------------------------\n");
+        printf("Total de produtos cadastrados: %d \n", totalItens);
+        printf("Total de itens em estoque: %d \n", totalQuantidade);
+        printf("Valor total do estoque: R$ %.2lf \n", valorTotal);
+    }
+}
+
+void produtosEstoqueBaixo(){
+    printf("\n-------------------| PRODUTOS COM ESTOQUE BAIXO |-------------------\n");
+    printf("Estoque minimo: %d\n\n", estoqueMinimo);
+
+    Produto * aux = inicioProduto;
+    int contador = 0;
+
+    while(aux != NULL){
+        if (aux->qntProduto <= estoqueMinimo) {
+            contador += 1;
+            printf("Codigo: %d \n", aux->codProduto);
+            printf("Nome: %s \n", aux->nomeProduto);
+            printf("Descricao: %s \n", aux->descricaoProduto);
+            printf("Preco: R$ %.2lf \n", aux->precoProduto);
+            printf("Quantidade: %d \n", aux->qntProduto);
+            printf("\n");
+        }
+
+        aux = aux->prox;
+    }
+
+    if (contador == 0) {
+        printf("Nao ha produtos com estoque baixo.\n");
+    }
+}
+
 // RF003
 void consultarProdutoCodigo(int cod){
     printf("\n-------------------| CONSULTA DE PRODUTO |-------------------\n");
@@ -837,10 +896,12 @@ void gerenciamentoProdutos(){
 
         case 6:
         // relatorio de inventario
+            relatorioInventario();
             break;
 
-        case 7: 
+        case 7:
         // produtos com estoque baixo
+            produtosEstoqueBaixo();
             break;
 
         case 8:
