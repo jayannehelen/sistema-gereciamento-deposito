@@ -33,6 +33,10 @@ int qtdFuncionarios = 0;
 
 int estoqueMinimo = 2;
 
+// --- PROTOTIPOS DE ARQUIVO ---
+void salvarInventario();
+void carregarInventario();
+
 // PRODUTO 
 Produto * buscarProduto(int cod){
     Produto * aux = inicioProduto;
@@ -67,6 +71,7 @@ void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, 
             qtdProdutosEstoque++;
 
             printf("Produto de codigo %d adicionado no estoque!\n", novo->codProduto);
+            salvarInventario(); // [ IMPLEMENTACAO AQUI ]
         }else{ 
             if (buscarProduto(cod) == NULL) {
                 if (novo->codProduto < inicioProduto->codProduto) { //caso do inicio
@@ -96,10 +101,11 @@ void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, 
                 qtdProdutosEstoque++;
 
                 printf("Produto de codigo %d adicionado no estoque!\n", novo->codProduto);
+                salvarInventario(); // [ IMPLEMENTACAO AQUI ]
 
             } else {
-                printf("Já existe um produto com esse codigo! Se quer alterar o estoque procure a opcao de alteracao.\n");
-    };
+                printf("Ja existe um produto com esse codigo! Se quer alterar o estoque procure a opcao de alteracao.\n");
+            };
         }
     } else {
         printf("Impossivel adicionar. Confira se o preco, quantidade ou codigo sao maiores que 0!\n");
@@ -137,7 +143,7 @@ void saidaEstoque(int cod){
             printf("A quantidade de estoque do produto e maior que a quantidade selecionada.\n");
         } else {
             aux->qntProduto -= qtdTemp;
-            // printf("Agora o estoque de %s e %d produtos\n", aux->nomeProduto, aux->qntProduto);
+            salvarInventario(); // [ IMPLEMENTACAO AQUI ]
 
             printf("\n | PRODUTO | \n");
             printf("Codigo: %d \n", aux->codProduto);
@@ -185,6 +191,7 @@ void atualizarEstoqueProduto(int codTemp){
         }
 
         aux->qntProduto += qtdTemp;
+        salvarInventario(); // [ IMPLEMENTACAO AQUI ]
 
         printf("Estoque atualizado com sucesso!\n");
 
@@ -422,6 +429,90 @@ void listar_funcionarios(){
     }
 }
 
+// --- FUNCOES DE ARQUIVO IMPLEMENTADAS AQUI ---
+
+// RF006 - Leitura do Arquivo
+void carregarInventario() {
+    FILE *arquivo = fopen("inventario.txt", "r");
+
+    if (arquivo == NULL) {
+        printf("\n[AVISO] Arquivo 'inventario.txt' nao encontrado. O sistema iniciara com o estoque vazio.\n");
+        return; 
+    }
+
+    int cod, quantidade;
+    char nome[100], descricao[100];
+    float preco;
+
+    while (fscanf(arquivo, "%d;%99[^;];%99[^;];%f;%d\n", &cod, nome, descricao, &preco, &quantidade) == 5) {
+        
+        Produto * novo = malloc(sizeof(Produto));
+        novo->codProduto = cod;
+        strcpy(novo->nomeProduto, nome);
+        strcpy(novo->descricaoProduto, descricao);
+        novo->precoProduto = preco;
+        novo->qntProduto = quantidade;
+        novo->prox = NULL;
+        novo->ant = NULL;
+
+        if(inicioProduto == NULL){ 
+            inicioProduto = novo;
+            fimProduto = novo;
+        }else{ 
+            if (novo->codProduto < inicioProduto->codProduto) { 
+                inicioProduto->ant = novo; 
+                novo->prox = inicioProduto;
+                inicioProduto = novo;
+            } else if(novo->codProduto >= fimProduto->codProduto){ 
+                fimProduto->prox = novo;
+                novo->ant = fimProduto;
+                fimProduto = novo;
+            }else{ 
+                Produto* aux = inicioProduto->prox;
+                while(aux != NULL && novo->codProduto >= aux->codProduto){
+                    aux = aux->prox;
+                }
+                aux->ant->prox = novo;
+                novo->prox = aux;
+                novo->ant = aux->ant;
+                aux->ant = novo;
+            }
+        }
+        qtdProdutosEstoque++;
+    }
+
+    fclose(arquivo);
+    printf("\n>>> Inventario carregado com sucesso! <<<\n");
+}
+
+// RF007 - Escrita do Arquivo
+void salvarInventario() {
+    FILE *arquivo = fopen("inventario.txt", "w");
+
+    if (arquivo == NULL) {
+        printf("\n[ERRO] Nao foi possivel abrir o arquivo inventario.txt para salvar!\n");
+        return;
+    }
+
+    Produto *aux = inicioProduto;
+
+    while (aux != NULL) {
+        fprintf(arquivo, "%d;%s;%s;%.2f;%d\n", 
+                aux->codProduto, 
+                aux->nomeProduto, 
+                aux->descricaoProduto, 
+                aux->precoProduto, 
+                aux->qntProduto);
+        
+        aux = aux->prox;
+    }
+
+    fclose(arquivo);
+}
+
+// ---------------------------------------------
+
+
 void gerenciamentoFuncionarios(){
 
     int escolha;
@@ -471,7 +562,7 @@ void gerenciamentoFuncionarios(){
                 break;
 
             case 0:
-                printf("\nEncerrando o sistema. Ate logo!\n");
+                printf("\nVoltando ao menu anterior...\n");
                 break;
 
             default:
@@ -701,7 +792,7 @@ void gerenciamentoProdutos(){
                             break;
 
                         default:
-                            printf("\nErro: escolha invalida! Escolha um numero de 0 a 2.\n");
+                            if(subEscolha != 0) printf("\nErro: escolha invalida! Escolha um numero de 0 a 2.\n");
                             break;
                     }
                 } while (subEscolha != 0);
@@ -757,7 +848,7 @@ void gerenciamentoProdutos(){
             break;
 
         default:
-            printf("\nErro: escolha invalida! Escolha um numero de 0 a 8.\n");
+            if(escolha != 0) printf("\nErro: escolha invalida! Escolha um numero de 0 a 8.\n");
             break;
         }
     } while (escolha != 0);
@@ -766,6 +857,8 @@ void gerenciamentoProdutos(){
 
 int main() {
     int opcao;
+
+    carregarInventario(); 
 
     do {
         printf("\n-------------------| MENU SISTEMA |-------------------\n");
@@ -784,7 +877,7 @@ int main() {
 
         switch (opcao) {
         case 1:
-            // gerenciar produtos (fazer a parte do usuario)
+            // gerenciar produtos 
             gerenciamentoProdutos();
             break;
         case 2:
@@ -792,6 +885,7 @@ int main() {
             gerenciamentoFuncionarios();
             break;
         case 0:
+            salvarInventario(); 
             printf("\nSistema sendo encerrado. Ate breve!\n");
             break;
         default:
