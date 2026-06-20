@@ -112,13 +112,13 @@ void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, 
     }
 }
 
-void saidaEstoque(int cod){
+void saidaEstoque(int codTemp){
     int qtdTemp;
 
     printf("\n-------------------| RETIRAR DO ESTOQUE |-------------------\n");
-    Produto *aux = buscarProduto(cod);
+    Produto *aux = buscarProduto(codTemp);
     if (aux == NULL){
-        printf("Produto %d inexistente no estoque.\n", cod);
+        printf("Produto %d inexistente no estoque.\n", codTemp);
     } else {
         
         printf("\n | PRODUTO | \n");
@@ -142,6 +142,8 @@ void saidaEstoque(int cod){
             printf("A quantidade de estoque do produto e maior que a quantidade selecionada.\n");
         } else {
             aux->qntProduto -= qtdTemp;
+
+            printf("Estoque do produto de codigo %d atualizado com sucesso!", codTemp);
             salvarArquivo(); // [ IMPLEMENTACAO AQUI ]
 
             printf("\n | PRODUTO | \n");
@@ -151,7 +153,6 @@ void saidaEstoque(int cod){
             printf("Preco: R$ %.2lf \n", aux->precoProduto);
             printf("Quantidade: %d \n", aux->qntProduto);
 
-            // RF005
             if (aux->qntProduto <= estoqueMinimo){
                 printf("\n-------------------| AVISO IMPORTANTE |-------------------\n");
                 printf("Ponto minimo de reabastecimento alcancado!\n");
@@ -252,6 +253,7 @@ void removerProdutoPermanentemente(int codTemp){
         }
     }
 };
+
 // Listar por filtro
 void listarTodosProdutos(){
     Produto * aux = inicioProduto;
@@ -385,11 +387,11 @@ void produtosEstoqueBaixo(){
 }
 
 // RF003
-void consultarProdutoCodigo(int cod){
+void consultarProdutoCodigo(int codTemp){
     printf("\n-------------------| CONSULTA DE PRODUTO |-------------------\n");
-    printf("Consulta por codigo: %d\n\n", cod);
+    printf("Consulta por codigo: %d\n\n", codTemp);
 
-    Produto * aux = buscarProduto(cod);
+    Produto * aux = buscarProduto(codTemp);
     if (aux == NULL) {
        printf("Produto inexistente.\n");
 
@@ -455,7 +457,7 @@ void consultarProdutoNome(char *nome){
     }
 
     if(!encontrouAlgum){
-        printf("Nenhum produto encontrado com o termo '%s'.\n", nome);
+        printf("Nenhum produto encontrado com '%s'.\n", nome);
     }
 }
 
@@ -512,7 +514,7 @@ void addFuncionarios(char *cpf, char *nome_usuario) {
     }
 }
 
-void removerPorCPF(char *cpfBusca) {
+void removerFuncionario(char *cpfBusca) {
 
     if (inicio_funcionarios != NULL) {
         Funcionario *aux = buscarPorCPF(cpfBusca);
@@ -687,7 +689,7 @@ void gerenciamentoFuncionarios(){
 
                     printf("Digite o CPF do funcionario a ser removido: ");
                     scanf("%11s", cpfTemp);
-                    removerPorCPF(cpfTemp);
+                    removerFuncionario(cpfTemp);
                 
                 break;
 
@@ -741,6 +743,7 @@ void gerenciamentoProdutos(){
                 printf("1. Listar todos os produtos\n");
                 printf("2. Filtrar por faixa de preco\n");
                 printf("3. Filtrar por faixa de codigo\n");
+                printf("4. Retirar produto do estoque\n");
                 printf("0. Voltar\n\n");
                 printf("Escolha uma opcao: ");
                 while (scanf("%d", &subEscolha) != 1) {
@@ -809,13 +812,32 @@ void gerenciamentoProdutos(){
                         limSuperior = 0;
                         break;
                         
+                    case 4:{
+                    // saida de estoque
+                        printf("\n-------------------| SAIDA DE ESTOQUE |-------------------\n");
+
+                        int codTemp;
+            
+                        printf("\nDigite o codigo do produto que deseja retirar: ");
+                        while (scanf("%d", &codTemp) != 1) {
+                            printf("\nErro: Digite apenas numeros.\n");
+
+                            while (getchar() != '\n');
+
+                            printf("Digite o codigo do produto que deseja retirar: ");
+                        }
+                        saidaEstoque(codTemp);
+                    }
+                        break;
+
                     default:
-                        printf("\nErro: escolha invalida! Escolha um numero de 0 a 3.\n");
+                        printf("\nErro: escolha invalida! Escolha um numero de 0 a 4.\n");
                         break;
                 }
             } while (subEscolha != 0);
             }
             break;
+
         case 2: {
             int codTemp, qtdTemp;
             char nomeTemp[100];
@@ -888,6 +910,7 @@ void gerenciamentoProdutos(){
                     printf("\n-------------------| CONSULTA DE PRODUTOS |-------------------\n");
                     printf("1. Pesquisar produtos\n");
                     printf("2. Consultar por codigo\n");
+                    printf("3. Retirar produto do estoque\n");
                     printf("0. Voltar\n\n");
                     printf("Escolha uma opcao: ");
                     while (scanf("%d", &subEscolha) != 1) {
@@ -926,9 +949,26 @@ void gerenciamentoProdutos(){
                             codTemp = 0, subEscolha = -1;
 
                             break;
+                        case 3:{
+                        // saida de estoque
+                            printf("\n-------------------| SAIDA DE ESTOQUE |-------------------\n");
+
+                            int codTemp;
+                
+                            printf("\nDigite o codigo do produto que deseja retirar: ");
+                            while (scanf("%d", &codTemp) != 1) {
+                                printf("\nErro: Digite apenas numeros.\n");
+
+                                while (getchar() != '\n');
+
+                                printf("Digite o codigo do produto que deseja retirar: ");
+                            }
+                            saidaEstoque(codTemp);
+                        }
+                            break;
 
                         default:
-                            if(subEscolha != 0) printf("\nErro: escolha invalida! Escolha um numero de 0 a 2.\n");
+                            printf("\nErro: escolha invalida! Escolha um numero de 0 a 3.\n");
                             break;
                     }
                 } while (subEscolha != 0);
@@ -998,7 +1038,7 @@ void gerenciamentoProdutos(){
             break;
 
         default:
-            if(escolha != 0) printf("\nErro: escolha invalida! Escolha um numero de 0 a 8.\n");
+            printf("\nErro: escolha invalida! Escolha um numero de 0 a 8.\n");
             break;
         }
     } while (escolha != 0);
