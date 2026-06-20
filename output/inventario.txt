@@ -1,4 +1,3 @@
-123;Refrigerante Sukita;1L;6.90;1
 456;Refrigerante Guarana;1L;7.90;2
 789;Refrigerante Spritt;2L;8.90;7
 951;Energetico Monster;453ml;12.40;12

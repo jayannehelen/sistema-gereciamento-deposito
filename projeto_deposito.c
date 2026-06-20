@@ -49,7 +49,7 @@ Produto * buscarProduto(int cod){
     return NULL;
 }
 
-// RF001
+// CRUD
 void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, int quantidade){
    
     printf("\n-------------------| ADICIONAR NO ESTOQUE |-------------------\n");
@@ -112,7 +112,6 @@ void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, 
     }
 }
 
-// RF002.1 (falta atualizacao - aumentar quantidade estoque)
 void saidaEstoque(int cod){
     int qtdTemp;
 
@@ -204,6 +203,55 @@ void atualizarEstoqueProduto(int codTemp){
     }
 }
 
+void removerProdutoPermanentemente(int codTemp){
+    printf("\n-------------------| REMOVER PRODUTO |-------------------\n");
+
+    Produto *aux = buscarProduto(codTemp);
+
+    if (aux == NULL) {
+        printf("Produto inexistente.\n");
+    } else{
+        if (aux->qntProduto > 0) {
+            printf("Ainda existem %d unidades em estoque.\n", aux->qntProduto);
+            printf("Zere o estoque antes de remover.\n");
+
+        } else {
+            printf("Produto encontrado: %s (codigo %d)\n", aux->nomeProduto, aux->codProduto);
+
+            int confirmacao;
+            printf("Tem certeza que deseja apagar este registro? (1 para Sim / 0 para Nao): ");
+            scanf("%d", &confirmacao);
+
+            if (confirmacao != 1) {
+                printf("Acao cancelada. O produto %s nao foi apagado(a).\n", aux->nomeProduto);
+
+            } else {
+                if (inicioProduto == aux){
+                    inicioProduto = aux->prox;
+
+                    if(qtdProdutosEstoque == 1){
+                        fimProduto = NULL;
+                    } else {
+                        inicioProduto->ant = NULL;
+                    }
+                } else if (aux == fimProduto) {
+                    //fim
+                    fimProduto = aux->ant;
+                    fimProduto->prox = NULL;
+                } else {
+                    // meio
+                    aux->ant->prox = aux->prox;
+                    aux->prox->ant = aux->ant;
+                }
+
+                free(aux);
+                qtdProdutosEstoque--;
+                salvarArquivo();
+                printf("Produto de codigo %d removido com sucesso!\n", codTemp);
+            }
+        }
+    }
+};
 // Listar por filtro
 void listarTodosProdutos(){
     Produto * aux = inicioProduto;
@@ -496,9 +544,7 @@ void removerPorCPF(char *cpfBusca) {
                     aux->prox->ant = aux->ant;  
                 }
 
-                Funcionario *lixo = aux;
-
-                free(lixo);
+                free(aux);
                 qtdFuncionarios--;
                 printf("\n\nFuncionario com CPF %s removido com sucesso!\n", cpfBusca);
             }
@@ -602,9 +648,6 @@ void salvarArquivo() {
 
     fclose(arquivo);
 }
-
-// ---------------------------------------------
-
 
 void gerenciamentoFuncionarios(){
 
@@ -938,8 +981,20 @@ void gerenciamentoProdutos(){
             produtosEstoqueBaixo();
             break;
 
-        case 8:
+        case 8:{
         // remover produto permanentemente
+            int codTemp;
+                
+            printf("Digite o codigo do produto que deseja remover permanentemente: ");
+            while (scanf("%d", &codTemp) != 1) {
+                printf("\nErro: Digite apenas numeros.\n");
+
+                while (getchar() != '\n');
+
+                printf("Digite o codigo do produto que deseja remover permanentemente: ");
+            }
+            removerProdutoPermanentemente(codTemp);
+        }
             break;
 
         default:
