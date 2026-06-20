@@ -44,7 +44,7 @@ Produto * buscarProduto(int cod){
 }
 
 // RF001
-void entradaEstoque( int cod, char *nome, char *descricao, float preco, int quantidade){
+void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, int quantidade){
    
     printf("\n-------------------| ADICIONAR NO ESTOQUE |-------------------\n");
 
@@ -146,6 +146,10 @@ void listarTodosProdutos(){
         //... fazer os demais dados
         aux = aux->prox;
     }
+    if (inicioProduto == NULL){
+        printf("Nao ha produtos cadastrados.\n");
+    }
+    
 }
 
 void listarProdutosDisponiveisPreco(double limiteI, double limiteS){
@@ -414,21 +418,196 @@ void gerenciamentoFuncionarios(){
 };
 
 void gerenciamentoProdutos(){
+    int escolha, subEscolha;
+    
+    do {
+        printf("\n-------------------| GERENCIAMENTO DE PRODUTOS |-------------------\n");
+        printf("1. Listar Produtos\n");
+        printf("2. Cadastrar Produto\n");
+        printf("3. Consultar Produto\n");
+        printf("4. Adicionar Estoque\n");
+        printf("5. Saida de Estoque\n");
+        printf("6. Relatorio de inventario\n");
+        printf("7. Produtos com estoque baixo\n");
+        printf("8. Remover produto permanentemente\n");
+        printf("0. Voltar\n\n");
+        printf("Escolha uma opcao: ");
+        while (scanf("%d", &escolha) != 1) {
+            printf("\nErro: Digite apenas numeros.\n");
+
+            while (getchar() != '\n');
+
+            printf("Escolha uma opcao: ");
+        }
+
+        switch (escolha)
+        {
+        case 1:
+            do {
+                printf("\n-------------------| LISTAGEM DE PRODUTOS |-------------------\n");
+                printf("1. Listar todos os produtos\n");
+                printf("2. Filtrar por faixa de preco\n");
+                printf("3. Filtrar por faixa de codigo\n");
+                printf("0. Voltar\n\n");
+                printf("Escolha uma opcao: ");
+                while (scanf("%d", &subEscolha) != 1) {
+                    printf("\nErro: Digite apenas numeros.\n");
+
+                    while (getchar() != '\n');
+
+                    printf("Escolha uma opcao: ");
+                }
+
+                switch (subEscolha)
+                {
+                    int limInferior, limSuperior;
+                    case 1:
+                        listarTodosProdutos();
+                        break;
+
+                    case 2:
+                        do {
+                            printf("Digite o preco menor: ");
+                            if (scanf("%d", &limInferior) != 1) {
+                                printf("Erro: Digite apenas numeros.\n");
+
+                                while (getchar() != '\n'); // limpa o buffer
+                                limInferior = -1;          // força repetir o loop
+                            }
+                        } while (limInferior <=0);
+                        
+                        do {  
+                            printf("Digite o preco maior: ");
+                            if (scanf("%d", &limSuperior) != 1) {
+                                printf("Erro: Digite apenas numeros.\n");
+
+                                while (getchar() != '\n'); // limpa o buffer
+                                limSuperior = -1;          // força repetir o loop
+                            }
+                        } while (limSuperior <=0 || limSuperior < limInferior);
+
+                        listarProdutosDisponiveisPreco(limInferior, limSuperior);
+                        limInferior = 0;
+                        limSuperior = 0;
+                        break;
+
+                    case 3: 
+                        do {
+                            printf("Digite o codigo menor: ");
+                            if (scanf("%d", &limInferior) != 1) {
+                                printf("Erro: Digite apenas numeros.\n");
+
+                                while (getchar() != '\n'); // limpa o buffer
+                                limInferior = -1;          // força repetir o loop
+                            }
+                        } while (limInferior <=0);
+                        
+                        do {  
+                            printf("Digite o codigo maior: ");
+                            if (scanf("%d", &limSuperior) != 1) {
+                                printf("Erro: Digite apenas numeros.\n");
+
+                                while (getchar() != '\n'); 
+                                limSuperior = -1;          
+                            }
+                        } while (limSuperior <=0 || limSuperior < limInferior);
+
+                        listarProdutosDisponiveisCodigo(limInferior, limSuperior);
+                        limInferior = 0;
+                        limSuperior = 0;
+                        break;
+                        
+                    default:
+                        printf("\nErro: escolha invalida! Escolha um numero de 0 a 3.\n");
+                        break;
+                }
+            } while (subEscolha != 0);
+            
+            break;
+        case 2: {
+            int codProduto, qtdProduto;
+            char nomeProduto[100];
+            char descricaoProduto[100];
+            float precoProduto;
+
+            printf("\n-------------------| CADASTRAR PRODUTOS |-------------------\n");
+            // cod
+            while (1) {
+                printf("Digite o codigo do produto: ");
+
+                if (scanf("%d", &codProduto) == 1 && codProduto > 0) {
+                    break; 
+                }
+
+                printf("Erro: Digite apenas numeros inteiros positivos.\n");
+
+                while (getchar() != '\n'); 
+            }
+            
+            // nome e descricao
+            while (getchar() != '\n'); 
+
+            printf("Digite o nome do produto: ");
+            fgets(nomeProduto, sizeof(nomeProduto), stdin);
+            nomeProduto[strcspn(nomeProduto, "\n")] = '\0';
+
+            printf("Digite a descricao do produto: ");
+            fgets(descricaoProduto, sizeof(descricaoProduto), stdin);
+            descricaoProduto[strcspn(descricaoProduto, "\n")] = '\0';   
+
+            // preco
+            while (1) {
+                printf("Digite o preco do produto: ");
+
+                if (scanf("%f", &precoProduto) == 1 && precoProduto >= 0) {
+                    while (getchar() != '\n');
+                    break;
+                }
+
+                printf("Erro: Digite um preco valido.\n");
+
+                while (getchar() != '\n');
+            }
+
+            // quantidade
+            while (1) {
+                printf("Digite a quantidade do produto: ");
+
+                if (scanf("%d", &qtdProduto) == 1 && qtdProduto >= 0) {
+                    while (getchar() != '\n');
+                    break;
+                }
+
+                printf("Erro: Digite uma quantidade valida.\n");
+
+                while (getchar() != '\n');
+            }
+
+            cadastrarProdutoEstoque(codProduto, nomeProduto, descricaoProduto, precoProduto, qtdProduto);
+
+            break;
+        }
+        default:
+            printf("\nErro: escolha invalida! Escolha um numero de 0 a 8.\n");
+            break;
+        }
+    } while (escolha != 0);
+    
     // testes 
-    entradaEstoque(101, "Refrigerante Coca Cola", "1L", 8.0, 12);
-    entradaEstoque(101, "Refrigerante Coca Cola", "250ml", 3.5, 15);
-    entradaEstoque(103, "Energetico Monster Energy", "473ml", 8.99, 24);
-    entradaEstoque(105, "Energetico Red Bull", "473ml", 18.90, 5);
-    entradaEstoque(102, "Refrigerante Antarctica Guarana", "2L", 10.99, 6);
-    entradaEstoque(104, "Agua Mineral sem Gas", "200ml", 3.3, 10);
+    // cadastrarProdutoEstoque(101, "Refrigerante Coca Cola", "1L", 8.0, 12);
+    // cadastrarProdutoEstoque(101, "Refrigerante Coca Cola", "250ml", 3.5, 15);
+    // cadastrarProdutoEstoque(103, "Energetico Monster Energy", "473ml", 8.99, 24);
+    // cadastrarProdutoEstoque(105, "Energetico Red Bull", "473ml", 18.90, 5);
+    // cadastrarProdutoEstoque(102, "Refrigerante Antarctica Guarana", "2L", 10.99, 6);
+    // cadastrarProdutoEstoque(104, "Agua Mineral sem Gas", "200ml", 3.3, 10);
 
-    listarTodosProdutos();
-    listarProdutosDisponiveisPreco(7.0, 12);
-    listarProdutosDisponiveisCodigo(101, 105);
-    saidaEstoque(103, 10);
+    // listarTodosProdutos();
+    // listarProdutosDisponiveisPreco(7.0, 12);
+    // listarProdutosDisponiveisCodigo(101, 105);
+    // saidaEstoque(103, 10);
 
-    consultarProdutoCodigo(110);
-    consultarProdutoNome("Z");
+    // consultarProdutoCodigo(110);
+    // consultarProdutoNome("Z");
 };
 
 int main() {
