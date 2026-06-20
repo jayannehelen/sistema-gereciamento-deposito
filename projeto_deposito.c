@@ -487,8 +487,7 @@ void gerenciamentoProdutos(){
                         } while (limSuperior <=0 || limSuperior < limInferior);
 
                         listarProdutosDisponiveisPreco(limInferior, limSuperior);
-                        limInferior = 0;
-                        limSuperior = 0;
+                        limInferior = 0, limSuperior = 0, subEscolha = -1;
                         break;
 
                     case 3: 
@@ -587,6 +586,83 @@ void gerenciamentoProdutos(){
 
             break;
         }
+        
+        case 3: {
+            // consultar produto
+            int codTemp;
+            char buscaTemp[50];
+
+            do {
+                    printf("\n-------------------| CONSULTA DE PRODUTOS |-------------------\n");
+                    printf("1. Pesquisar produtos\n");
+                    printf("2. Consultar por codigo\n");
+                    printf("0. Voltar\n\n");
+                    printf("Escolha uma opcao: ");
+                    while (scanf("%d", &subEscolha) != 1) {
+                        printf("\nErro: Digite apenas numeros.\n");
+
+                        while (getchar() != '\n');
+
+                        printf("Escolha uma opcao: ");
+                    }
+
+                    while (getchar() != '\n');
+
+                    switch (subEscolha)
+                    {
+                        case 1:
+                            printf("Pesquisar por: ");
+                            fgets(buscaTemp, sizeof(buscaTemp), stdin);
+                            buscaTemp[strcspn(buscaTemp, "\n")] = '\0';
+
+                            consultarProdutoNome(buscaTemp);
+                            subEscolha = -1;
+                            break;
+
+                        case 2:
+                            do {
+                                printf("Digite o codigo: ");
+                                if (scanf("%d", &codTemp) != 1) {
+                                    printf("Erro: Digite apenas numeros.\n");
+
+                                    while (getchar() != '\n'); // limpa o buffer
+                                    codTemp = -1;          // força repetir o loop
+                                }
+                            } while (codTemp <=0);
+
+                            consultarProdutoCodigo(codTemp);
+                            codTemp = 0, subEscolha = -1;
+
+                            break;
+
+                        default:
+                            printf("\nErro: escolha invalida! Escolha um numero de 0 a 2.\n");
+                            break;
+                    }
+                } while (subEscolha != 0);
+            }
+
+            break;
+        case 4: 
+        // atualizar estoque
+            break;
+
+        case 5: 
+        // saida de estoque
+            break;
+
+        case 6:
+        // relatorio de inventario
+            break;
+
+        case 7: 
+        // produtos com estoque baixo
+            break;
+
+        case 8:
+        // remover produto permanentemente
+            break;
+
         default:
             printf("\nErro: escolha invalida! Escolha um numero de 0 a 8.\n");
             break;
