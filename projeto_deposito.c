@@ -34,8 +34,8 @@ int qtdFuncionarios = 0;
 int estoqueMinimo = 2;
 
 // --- PROTOTIPOS DE ARQUIVO ---
-void salvarInventario();
-void carregarInventario();
+void salvarArquivo();
+void carregarArquivo();
 
 // PRODUTO 
 Produto * buscarProduto(int cod){
@@ -71,7 +71,7 @@ void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, 
             qtdProdutosEstoque++;
 
             printf("Produto de codigo %d adicionado no estoque!\n", novo->codProduto);
-            salvarInventario(); // [ IMPLEMENTACAO AQUI ]
+            salvarArquivo(); // [ IMPLEMENTACAO AQUI ]
         }else{ 
             if (buscarProduto(cod) == NULL) {
                 if (novo->codProduto < inicioProduto->codProduto) { //caso do inicio
@@ -101,7 +101,7 @@ void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, 
                 qtdProdutosEstoque++;
 
                 printf("Produto de codigo %d adicionado no estoque!\n", novo->codProduto);
-                salvarInventario(); // [ IMPLEMENTACAO AQUI ]
+                salvarArquivo(); // [ IMPLEMENTACAO AQUI ]
 
             } else {
                 printf("Ja existe um produto com esse codigo! Se quer alterar o estoque procure a opcao de alteracao.\n");
@@ -143,7 +143,7 @@ void saidaEstoque(int cod){
             printf("A quantidade de estoque do produto e maior que a quantidade selecionada.\n");
         } else {
             aux->qntProduto -= qtdTemp;
-            salvarInventario(); // [ IMPLEMENTACAO AQUI ]
+            salvarArquivo(); // [ IMPLEMENTACAO AQUI ]
 
             printf("\n | PRODUTO | \n");
             printf("Codigo: %d \n", aux->codProduto);
@@ -191,7 +191,7 @@ void atualizarEstoqueProduto(int codTemp){
         }
 
         aux->qntProduto += qtdTemp;
-        salvarInventario(); // [ IMPLEMENTACAO AQUI ]
+        salvarArquivo(); // [ IMPLEMENTACAO AQUI ]
 
         printf("Estoque atualizado com sucesso!\n");
 
@@ -432,7 +432,7 @@ void listar_funcionarios(){
 // --- FUNCOES DE ARQUIVO IMPLEMENTADAS AQUI ---
 
 // RF006 - Leitura do Arquivo
-void carregarInventario() {
+void carregarArquivo() {
     FILE *arquivo = fopen("inventario.txt", "r");
 
     if (arquivo == NULL) {
@@ -486,7 +486,7 @@ void carregarInventario() {
 }
 
 // RF007 - Escrita do Arquivo
-void salvarInventario() {
+void salvarArquivo() {
     FILE *arquivo = fopen("inventario.txt", "w");
 
     if (arquivo == NULL) {
@@ -858,7 +858,7 @@ void gerenciamentoProdutos(){
 int main() {
     int opcao;
 
-    carregarInventario(); 
+    carregarArquivo(); 
 
     do {
         printf("\n-------------------| MENU SISTEMA |-------------------\n");
@@ -885,7 +885,7 @@ int main() {
             gerenciamentoFuncionarios();
             break;
         case 0:
-            salvarInventario(); 
+            salvarArquivo(); 
             printf("\nSistema sendo encerrado. Ate breve!\n");
             break;
         default:
