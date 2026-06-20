@@ -762,21 +762,6 @@ void gerenciamentoProdutos(){
         }
     } while (escolha != 0);
     
-    // testes 
-    // cadastrarProdutoEstoque(101, "Refrigerante Coca Cola", "1L", 8.0, 12);
-    // cadastrarProdutoEstoque(101, "Refrigerante Coca Cola", "250ml", 3.5, 15);
-    // cadastrarProdutoEstoque(103, "Energetico Monster Energy", "473ml", 8.99, 24);
-    // cadastrarProdutoEstoque(105, "Energetico Red Bull", "473ml", 18.90, 5);
-    // cadastrarProdutoEstoque(102, "Refrigerante Antarctica Guarana", "2L", 10.99, 6);
-    // cadastrarProdutoEstoque(104, "Agua Mineral sem Gas", "200ml", 3.3, 10);
-
-    // listarTodosProdutos();
-    // listarProdutosDisponiveisPreco(7.0, 12);
-    // listarProdutosDisponiveisCodigo(101, 105);
-    // saidaEstoque(103, 10);
-
-    // consultarProdutoCodigo(110);
-    // consultarProdutoNome("Z");
 };
 
 int main() {
