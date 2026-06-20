@@ -1,3 +1,4 @@
 456;Refrigerante Guarana;1L;7.90;2
+569;Energetico RedBull;463ml;18.00;9
 789;Refrigerante Spritt;2L;8.90;7
 951;Energetico Monster;453ml;12.40;10
