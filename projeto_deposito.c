@@ -16,8 +16,9 @@ typedef struct Produto{
 } Produto;
 
 typedef struct Funcionario {
+    int codUsuario;
     char cpf[12]; 
-    char nome_usuario[50];
+    char nomeUsuario[50];
 
     struct Funcionario *prox;
     struct Funcionario *ant;
@@ -27,9 +28,9 @@ Produto *inicioProduto = NULL;
 Produto *fimProduto = NULL;
 int qtdProdutosEstoque = 0;
 
-Funcionario *inicio_funcionarios = NULL;
-Funcionario *fim_funcionarios = NULL;
-int qtdFuncionarios = 0;
+Funcionario *inicioFuncionario = NULL;
+Funcionario *fimFuncionario = NULL;
+int qtdFuncionarios = 0, codFuncionario = 0;
 
 int estoqueMinimo = 2;
 
@@ -475,7 +476,7 @@ int cpfValido(char *cpf) {
 }
 
 Funcionario *buscarPorCPF(char *cpf) {
-    Funcionario *aux = inicio_funcionarios;
+    Funcionario *aux = inicioFuncionario;
 
     while (aux != NULL) {
         if (strcmp(aux->cpf, cpf) == 0){
@@ -488,25 +489,27 @@ Funcionario *buscarPorCPF(char *cpf) {
     return NULL;
 }
 
-void addFuncionarios(char *cpf, char *nome_usuario) {
+void addFuncionarios(char *cpf, char *nomeUsuario) {
 
     if (cpfValido(cpf) && buscarPorCPF(cpf) == NULL) {
         Funcionario *novo = malloc(sizeof(Funcionario));
+        novo->codUsuario = codFuncionario;
         strcpy(novo->cpf, cpf);
-        strcpy(novo->nome_usuario, nome_usuario);
+        strcpy(novo->nomeUsuario, nomeUsuario);
         novo->prox = NULL;
         novo->ant = NULL;
 
-        if (inicio_funcionarios == NULL) { 
-            inicio_funcionarios = novo;
-            fim_funcionarios = novo;
+        if (inicioFuncionario == NULL) { 
+            inicioFuncionario = novo;
+            fimFuncionario = novo;
         } else { 
-            novo->ant = fim_funcionarios;
-            fim_funcionarios->prox = novo;
-            fim_funcionarios = novo;
+            novo->ant = fimFuncionario;
+            fimFuncionario->prox = novo;
+            fimFuncionario = novo;
         }
         
         qtdFuncionarios++;
+        codFuncionario++;
         printf(">>> Cadastro realizado com sucesso! <<<\n");
     } else {
         printf("\nAVISO: Impossivel cadastrar usuario\n");
@@ -516,31 +519,31 @@ void addFuncionarios(char *cpf, char *nome_usuario) {
 
 void removerFuncionario(char *cpfBusca) {
 
-    if (inicio_funcionarios != NULL) {
+    if (inicioFuncionario != NULL) {
         Funcionario *aux = buscarPorCPF(cpfBusca);
         
         if (aux == NULL) {
             printf("Impossivel remover. Nao existe nenhum usuario com esse cpf!\n");
         } else {
             int confirmacao;
-            printf("\nFuncionario encontrado: %s\n", aux->nome_usuario);
+            printf("\nFuncionario encontrado: %s\n", aux->nomeUsuario);
             printf("Tem certeza que deseja apagar este registro? (1 para Sim / 0 para Nao): ");
             scanf("%d", &confirmacao);
 
             if (confirmacao != 1) {
-                printf("Acao cancelada. O(a) funcionario(a) %s nao foi apagado(a).\n", aux->nome_usuario);
+                printf("Acao cancelada. O(a) funcionario(a) %s nao foi apagado(a).\n", aux->nomeUsuario);
             } else {
-                if (inicio_funcionarios == aux){
-                    inicio_funcionarios = aux->prox;
+                if (inicioFuncionario == aux){
+                    inicioFuncionario = aux->prox;
 
                     if(qtdFuncionarios == 1){
-                        fim_funcionarios = NULL;
+                        fimFuncionario = NULL;
                     } else {
-                        inicio_funcionarios->ant = NULL;
+                        inicioFuncionario->ant = NULL;
                     }
-                } else if (fim_funcionarios == aux){
-                    fim_funcionarios = aux->ant;
-                    fim_funcionarios->prox = NULL;
+                } else if (fimFuncionario == aux){
+                    fimFuncionario = aux->ant;
+                    fimFuncionario->prox = NULL;
                 } else {
                     aux->ant->prox = aux->prox; 
                     aux->prox->ant = aux->ant;  
@@ -556,15 +559,15 @@ void removerFuncionario(char *cpfBusca) {
     }
 }
 
-void listar_funcionarios(){
+void listarFuncionarios(){
 
-    Funcionario *aux = inicio_funcionarios;
+    Funcionario *aux = inicioFuncionario;
     
     if (aux == NULL) {
         printf("\n\nNenhum funcionario cadastrado.\n");
     } else {
         while (aux != NULL) {
-            printf("\nCPF: %s | Nome: %s\n", aux->cpf, aux->nome_usuario);
+            printf("\nID: %d | CPF: %s | Nome: %s\n", aux->codUsuario, aux->cpf, aux->nomeUsuario);
             aux = aux->prox;
         }
     }
@@ -695,7 +698,7 @@ void gerenciamentoFuncionarios(){
 
             case 3:
                 printf("\n-------------------| LISTAR FUNCIONARIOS |-------------------\n");
-                listar_funcionarios();
+                listarFuncionarios();
 
                 break;
 
@@ -1076,7 +1079,8 @@ int main() {
             break;
         case 0:
             salvarArquivo(); 
-            printf("\nSistema sendo encerrado. Ate breve!\n");
+            printf("\n-------------------| SISTEMA ENCERRADO |-------------------\n");
+            printf("\nAte breve!\n");
             break;
         default:
             printf("\nErro: escolha invalida! Escolha um numero de 0 a 2.\n");
