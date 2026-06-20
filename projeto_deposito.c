@@ -205,7 +205,7 @@ void listarProdutosDisponiveisCodigo(int codMenor, int codMaior){
 }
 
 // RF003
-void consultarProdutoCodigo(int cod){
+Produto * consultarProdutoCodigo(int cod){
     printf("\n-------------------| CONSULTA DE PRODUTO |-------------------\n");
     printf("Consulta por codigo: %d\n\n", cod);
 
@@ -220,6 +220,8 @@ void consultarProdutoCodigo(int cod){
         printf("Preco: %.2lf \n", aux->precoProduto);
         printf("Quantidade: %d \n", aux->qntProduto);
     }
+
+    return aux;
 }
 
 void consultarProdutoNome(char *nome){
@@ -242,6 +244,28 @@ void consultarProdutoNome(char *nome){
     }
     if(!existe){
         printf("Nenhum produto encontrado.\n");
+    }
+}
+
+void atualizarEstoqueProduto(int codTemp){
+    int qtdTemp;
+    
+    Produto * aux = consultarProdutoCodigo(codTemp);
+
+    if (aux != NULL) {
+        printf("\nDigite a nova quantidade: ");
+        scanf("%d", &qtdTemp);
+
+        aux->qntProduto += qtdTemp;
+
+        printf("Estoque atualizado com sucesso!\n");
+
+        printf("\n-------------------| PRODUTO |-------------------\n");
+        printf("Codigo: %d \n", aux->codProduto);
+        printf("Nome: %s \n", aux->nomeProduto);
+        printf("Descricao: %s \n", aux->descricaoProduto);
+        printf("Preco: %.2lf \n", aux->precoProduto);
+        printf("Quantidade: %d \n", aux->qntProduto);
     }
 }
 
@@ -442,7 +466,7 @@ void gerenciamentoProdutos(){
 
         switch (escolha)
         {
-        case 1:
+        case 1:{
             do {
                 printf("\n-------------------| LISTAGEM DE PRODUTOS |-------------------\n");
                 printf("1. Listar todos os produtos\n");
@@ -521,20 +545,20 @@ void gerenciamentoProdutos(){
                         break;
                 }
             } while (subEscolha != 0);
-            
+            }
             break;
         case 2: {
-            int codProduto, qtdProduto;
-            char nomeProduto[100];
-            char descricaoProduto[100];
-            float precoProduto;
+            int codTemp, qtdTemp;
+            char nomeTemp[100];
+            char descricaoTemp[100];
+            float precoTemp;
 
             printf("\n-------------------| CADASTRAR PRODUTOS |-------------------\n");
             // cod
             while (1) {
                 printf("Digite o codigo do produto: ");
 
-                if (scanf("%d", &codProduto) == 1 && codProduto > 0) {
+                if (scanf("%d", &codTemp) == 1 && codTemp > 0) {
                     break; 
                 }
 
@@ -547,18 +571,18 @@ void gerenciamentoProdutos(){
             while (getchar() != '\n'); 
 
             printf("Digite o nome do produto: ");
-            fgets(nomeProduto, sizeof(nomeProduto), stdin);
-            nomeProduto[strcspn(nomeProduto, "\n")] = '\0';
+            fgets(nomeTemp, sizeof(nomeTemp), stdin);
+            nomeTemp[strcspn(nomeTemp, "\n")] = '\0';
 
             printf("Digite a descricao do produto: ");
-            fgets(descricaoProduto, sizeof(descricaoProduto), stdin);
-            descricaoProduto[strcspn(descricaoProduto, "\n")] = '\0';   
+            fgets(descricaoTemp, sizeof(descricaoTemp), stdin);
+            descricaoTemp[strcspn(descricaoTemp, "\n")] = '\0';   
 
             // preco
             while (1) {
                 printf("Digite o preco do produto: ");
 
-                if (scanf("%f", &precoProduto) == 1 && precoProduto >= 0) {
+                if (scanf("%f", &precoTemp) == 1 && precoTemp >= 0) {
                     while (getchar() != '\n');
                     break;
                 }
@@ -572,7 +596,7 @@ void gerenciamentoProdutos(){
             while (1) {
                 printf("Digite a quantidade do produto: ");
 
-                if (scanf("%d", &qtdProduto) == 1 && qtdProduto >= 0) {
+                if (scanf("%d", &qtdTemp) == 1 && qtdTemp >= 0) {
                     while (getchar() != '\n');
                     break;
                 }
@@ -582,10 +606,9 @@ void gerenciamentoProdutos(){
                 while (getchar() != '\n');
             }
 
-            cadastrarProdutoEstoque(codProduto, nomeProduto, descricaoProduto, precoProduto, qtdProduto);
-
-            break;
+            cadastrarProdutoEstoque(codTemp, nomeTemp, descricaoTemp, precoTemp, qtdTemp);
         }
+            break;
         
         case 3: {
             // consultar produto
@@ -641,10 +664,23 @@ void gerenciamentoProdutos(){
                     }
                 } while (subEscolha != 0);
             }
-
             break;
-        case 4: 
+        
+        case 4: {
         // atualizar estoque
+            int codTemp;
+
+            printf("\nDigite o codigo do produto que pretende alterar a quantidade: ");
+            while (scanf("%d", &codTemp) != 1) {
+                printf("\nErro: Digite apenas numeros.\n");
+
+                while (getchar() != '\n');
+
+                printf("Digite o codigo do produto que pretende alterar a quantidade: ");
+            }
+
+            atualizarEstoqueProduto(codTemp);
+            }
             break;
 
         case 5: 
