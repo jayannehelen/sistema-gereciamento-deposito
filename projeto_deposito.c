@@ -551,6 +551,19 @@ int cpfValido(char *cpf) {
     return 1;
 }
 
+Funcionario *buscarPorCodUsuario(int cod) {
+    Funcionario *aux = inicioFuncionario;
+
+    while (aux != NULL) {
+        if (aux->codUsuario == cod){
+            return aux;
+        }
+        aux = aux->prox;
+    }
+
+    return NULL;
+}
+
 Funcionario *buscarPorCPF(char *cpf) {
     Funcionario *aux = inicioFuncionario;
 
@@ -1065,10 +1078,32 @@ int main() {
         }
 
         switch (opcao) {
-        case 1:
-            // gerenciar produtos 
-            gerenciamentoProdutos();
+        case 1: {
+            if (inicioFuncionario == NULL) {
+                printf("\n[ACESSO NEGADO] Nenhum funcionario cadastrado no sistema.\n");
+                printf("Va em 'Gerenciar funcionarios' e cadastre-se primeiro.\n");
+            } else {
+                int codAcesso;
+                printf("\n-------------------| LOGIN |-------------------\n");
+                printf("Digite o seu ID de Funcionario: ");
+                
+                while (scanf("%d", &codAcesso) != 1) {
+                    printf("\nErro: Digite apenas numeros.\n");
+                    while (getchar() != '\n');
+                    printf("Digite o seu ID de Funcionario: ");
+                }
+
+                Funcionario *usuarioLogado = buscarPorCodUsuario(codAcesso);
+
+                if (usuarioLogado != NULL) {
+                    printf("\n>>> Acesso Permitido. Bem-vindo(a), %s! <<<\n", usuarioLogado->nomeUsuario);
+                    gerenciamentoProdutos(); // Só chama o menu se o login der certo
+                } else {
+                    printf("\n[ACESSO NEGADO] Funcionario com ID %d nao encontrado.\n", codAcesso);
+                }
+            }
             break;
+            }
         case 2:
             // gerenciar usuarios
             gerenciamentoFuncionarios();
