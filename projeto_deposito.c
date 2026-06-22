@@ -10,19 +10,18 @@ typedef struct Produto{
     float precoProduto;
     int qntProduto;
 
-    struct Produto * prox;
+    struct Produto *prox;
     struct Produto *ant;
+}Produto;
 
-} Produto;
-
-typedef struct Funcionario {
+typedef struct Funcionario{
     int codUsuario;
     char cpf[12]; 
     char nomeUsuario[50];
 
     struct Funcionario *prox;
     struct Funcionario *ant;
-} Funcionario;
+}Funcionario;
 
 Produto *inicioProduto = NULL;
 Produto *fimProduto = NULL;
@@ -30,9 +29,37 @@ int qtdProdutosEstoque = 0;
 
 Funcionario *inicioFuncionario = NULL;
 Funcionario *fimFuncionario = NULL;
-int qtdFuncionarios = 0, codFuncionario = 0;
 
+int qtdFuncionarios = 0;
+int codFuncionario = 1;
 int estoqueMinimo = 2;
+
+void inserirProdutoLista(Produto *novo){
+    if(inicioProduto == NULL){ 
+        inicioProduto = novo;
+        fimProduto = novo;
+    }else{ 
+        if (novo->codProduto < inicioProduto->codProduto) { 
+            inicioProduto->ant = novo; 
+            novo->prox = inicioProduto;
+            inicioProduto = novo;
+        }else if (novo->codProduto >= fimProduto->codProduto) { 
+            fimProduto->prox = novo;
+            novo->ant = fimProduto;
+            fimProduto = novo;
+        }else { 
+            Produto *aux = inicioProduto->prox;
+            while(aux != NULL && novo->codProduto >= aux->codProduto){
+                aux = aux->prox;
+            }
+            aux->ant->prox = novo;
+            novo->prox = aux;
+            novo->ant = aux->ant;
+            aux->ant = novo;
+        }
+    }
+    qtdProdutosEstoque++;
+}
 
 // --- PROTOTIPOS DE ARQUIVO ---
 void salvarArquivo();
@@ -52,8 +79,18 @@ void carregarArquivo() {
     float preco;
 
     while (fscanf(arquivo, "%d;%99[^;];%99[^;];%f;%d\n", &cod, nome, descricao, &preco, &quantidade) == 5) {
+
+        if (cod <= 0 || preco < 0 || quantidade < 0) {
+            continue;
+        }
         
-        Produto * novo = malloc(sizeof(Produto));
+        Produto *novo = malloc(sizeof(Produto));
+
+        if (novo == NULL) {
+            printf("Erro de memoria.\n");
+            return;
+        }
+
         novo->codProduto = cod;
         strcpy(novo->nomeProduto, nome);
         strcpy(novo->descricaoProduto, descricao);
@@ -62,30 +99,7 @@ void carregarArquivo() {
         novo->prox = NULL;
         novo->ant = NULL;
 
-        if(inicioProduto == NULL){ 
-            inicioProduto = novo;
-            fimProduto = novo;
-        }else{ 
-            if (novo->codProduto < inicioProduto->codProduto) { 
-                inicioProduto->ant = novo; 
-                novo->prox = inicioProduto;
-                inicioProduto = novo;
-            } else if(novo->codProduto >= fimProduto->codProduto){ 
-                fimProduto->prox = novo;
-                novo->ant = fimProduto;
-                fimProduto = novo;
-            }else{ 
-                Produto* aux = inicioProduto->prox;
-                while(aux != NULL && novo->codProduto >= aux->codProduto){
-                    aux = aux->prox;
-                }
-                aux->ant->prox = novo;
-                novo->prox = aux;
-                novo->ant = aux->ant;
-                aux->ant = novo;
-            }
-        }
-        qtdProdutosEstoque++;
+        inserirProdutoLista(novo);
     }
 
     fclose(arquivo);
@@ -97,6 +111,7 @@ void salvarArquivo() {
 
     if (arquivo == NULL) {
         printf("\n[ERRO] Nao foi possivel abrir o arquivo inventario.txt para salvar!\n");
+
         return;
     }
 
@@ -117,10 +132,10 @@ void salvarArquivo() {
 }
 
 // PRODUTO 
-Produto * buscarProduto(int cod){
-    Produto * aux = inicioProduto;
-    while(aux != NULL){
-        if(aux->codProduto == cod){
+Produto *buscarProduto(int cod) {
+    Produto *aux = inicioProduto;
+    while(aux != NULL) {
+        if(aux->codProduto == cod) {
             return aux;
         }
         aux = aux->prox;
@@ -129,14 +144,19 @@ Produto * buscarProduto(int cod){
 }
 
 // CRUD PRODUTO
-void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, int quantidade){
-   
+void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, int quantidade){   
     printf("\n-------------------| ADICIONAR NO ESTOQUE |-------------------\n");
 
     if(preco > 0 && quantidade > 0 && cod > 0){
-
         if (buscarProduto(cod) == NULL) {
-            Produto * novo = malloc(sizeof(Produto));
+
+            Produto *novo = malloc(sizeof(Produto));
+
+            if (novo == NULL) {
+                printf("Erro de memoria.\n");
+                return;
+            }
+
             novo->codProduto = cod;
             strcpy(novo->nomeProduto, nome);
             strcpy(novo->descricaoProduto, descricao);
@@ -145,47 +165,15 @@ void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, 
             novo->prox = NULL;
             novo->ant = NULL;
 
-            if(inicioProduto == NULL){ 
-                inicioProduto = novo;
-                fimProduto = novo;
-                qtdProdutosEstoque++;
+            inserirProdutoLista(novo);
 
-                printf("Produto de codigo %d adicionado no estoque!\n", novo->codProduto);
-                salvarArquivo(); // [ IMPLEMENTACAO AQUI ]
-            } else{ 
-                if (novo->codProduto < inicioProduto->codProduto) { //caso do inicio
-                    inicioProduto->ant = novo; 
-                    novo->ant = NULL;
-                    novo->prox = inicioProduto;
-                    inicioProduto = novo;
+            printf("Produto de codigo %d adicionado no estoque!\n", novo->codProduto);
+            salvarArquivo();
 
-                } else if(novo->codProduto >= fimProduto->codProduto){ //caso do fim
-                    fimProduto->prox = novo;
-                    novo->prox = NULL;
-                    novo->ant = fimProduto;
-                    fimProduto = novo;
-
-                }else{
-                    //meio ...
-                    Produto* aux = inicioProduto->prox;
-                    while(aux != NULL && novo->codProduto >= aux->codProduto){
-                        aux = aux->prox;
-                    }
-
-                    aux->ant->prox = novo;
-                    novo->prox = aux;
-                    novo->ant = aux->ant;
-                    aux->ant = novo;
-                }
-                qtdProdutosEstoque++;
-
-                printf("Produto de codigo %d adicionado no estoque!\n", novo->codProduto);
-                salvarArquivo(); // [ IMPLEMENTACAO AQUI ]
-            }
-        } else {
+        }else {
             printf("Ja existe um produto com esse codigo! Se quer alterar o estoque procure a opcao de alteracao.\n");
-        };
-    } else {
+        }
+    }else {
         printf("Impossivel adicionar. Confira se o preco, quantidade ou codigo sao maiores que 0!\n");
     }
 }
@@ -197,7 +185,7 @@ void saidaEstoque(int codTemp){
     Produto *aux = buscarProduto(codTemp);
     if (aux == NULL){
         printf("Produto %d inexistente no estoque.\n", codTemp);
-    } else {
+    }else {
         
         printf("\n | PRODUTO | \n");
         printf("Codigo: %d \n", aux->codProduto);
@@ -207,7 +195,7 @@ void saidaEstoque(int codTemp){
         printf("Quantidade: %d \n", aux->qntProduto);
 
         printf("\nDigite quantos desse produto voce deseja retirar: ");
-        while (scanf("%d", &qtdTemp) != 1) {
+        while (scanf("%d", &qtdTemp) != 1 || qtdTemp <= 0) {
             printf("\nErro: Digite apenas numeros.\n");
 
             while (getchar() != '\n');
@@ -217,11 +205,11 @@ void saidaEstoque(int codTemp){
 
         if (qtdTemp > aux->qntProduto) {
             printf("AVISO: IMPOSSIVEL RETIRADA DE ESTOQUE!\n");
-            printf("A quantidade de estoque do produto e maior que a quantidade selecionada.\n");
-        } else {
+            printf("A quantidade solicitada e maior que o estoque disponivel.\n");
+        }else {
             aux->qntProduto -= qtdTemp;
 
-            printf("Estoque do produto de codigo %d atualizado com sucesso!", codTemp);
+            printf("Estoque do produto de codigo %d atualizado com sucesso!\n", codTemp);
             salvarArquivo(); // [ IMPLEMENTACAO AQUI ]
 
             printf("\n | PRODUTO | \n");
@@ -246,7 +234,7 @@ void atualizarEstoqueProduto(int codTemp){
     
     int qtdTemp;
     
-    Produto * aux = buscarProduto(codTemp);
+    Produto *aux = buscarProduto(codTemp);
 
     if (aux == NULL) {
         printf("Produto %d inexistente no estoque.\n", codTemp);
@@ -289,12 +277,12 @@ void removerProdutoPermanentemente(int codTemp){
 
     if (aux == NULL) {
         printf("Produto inexistente.\n");
-    } else{
+    }else{
         if (aux->qntProduto > 0) {
             printf("Ainda existem %d unidades em estoque.\n", aux->qntProduto);
             printf("Zere o estoque antes de remover.\n");
 
-        } else {
+        }else {
             printf("Produto encontrado: %s (codigo %d)\n", aux->nomeProduto, aux->codProduto);
 
             int confirmacao;
@@ -304,7 +292,7 @@ void removerProdutoPermanentemente(int codTemp){
             if (confirmacao != 1) {
                 printf("Acao cancelada. O produto %s nao foi apagado(a).\n", aux->nomeProduto);
 
-            } else {
+            }else {
                 if (inicioProduto == aux){
                     inicioProduto = aux->prox;
 
@@ -313,11 +301,11 @@ void removerProdutoPermanentemente(int codTemp){
                     } else {
                         inicioProduto->ant = NULL;
                     }
-                } else if (aux == fimProduto) {
+                }else if (aux == fimProduto) {
                     //fim
                     fimProduto = aux->ant;
                     fimProduto->prox = NULL;
-                } else {
+                }else {
                     // meio
                     aux->ant->prox = aux->prox;
                     aux->prox->ant = aux->ant;
@@ -330,11 +318,11 @@ void removerProdutoPermanentemente(int codTemp){
             }
         }
     }
-};
+}
 
 // Listar por filtro
 void listarTodosProdutos(){
-    Produto * aux = inicioProduto;
+    Produto *aux = inicioProduto;
 
     printf("\n-------------------| VER PRODUTOS |-------------------\n");
     while(aux != NULL){
@@ -344,7 +332,6 @@ void listarTodosProdutos(){
         printf("Preco: R$ %.2f \n", aux->precoProduto);
         printf("Quantidade: %d \n", aux->qntProduto);
         printf("\n");
-        //... fazer os demais dados
         aux = aux->prox;
     }
     if (inicioProduto == NULL){
@@ -357,7 +344,7 @@ void listarProdutosDisponiveisPreco(double limiteI, double limiteS){
     printf("\n-------------------| VER PRODUTOS |-------------------\n");
     printf("Filtrado por Preco: R$ %.2f - %.2f\n", limiteI, limiteS);
 
-    Produto * aux = inicioProduto;
+    Produto *aux = inicioProduto;
     int contador=0;
 
     while(aux != NULL){
@@ -383,8 +370,8 @@ void listarProdutosDisponiveisCodigo(int codMenor, int codMaior){
     printf("\n-------------------| VER PRODUTOS |-------------------\n");
     printf("Filtrado por codigo: %d - %d\n", codMenor, codMaior);
 
-    Produto * aux = inicioProduto;
-    int contador=0;
+    Produto *aux = inicioProduto;
+    int contador = 0;
 
     while(aux != NULL){
         if (aux->codProduto >= codMenor && aux->codProduto <= codMaior) {
@@ -408,7 +395,7 @@ void listarProdutosDisponiveisCodigo(int codMenor, int codMaior){
 void relatorioInventario(){
     printf("\n-------------------| RELATORIO DE INVENTARIO |-------------------\n");
 
-    Produto * aux = inicioProduto;
+    Produto *aux = inicioProduto;
     int totalItens = 0;
     int totalQuantidade = 0;
     float valorTotal = 0;
@@ -430,7 +417,7 @@ void relatorioInventario(){
 
     if (totalItens == 0) {
         printf("Nao ha produtos cadastrados.\n");
-    } else {
+    }else {
         printf("-------------------------------------------------\n");
         printf("Total de produtos cadastrados: %d \n", totalItens);
         printf("Total de itens em estoque: %d \n", totalQuantidade);
@@ -442,7 +429,7 @@ void produtosEstoqueBaixo(){
     printf("\n-------------------| PRODUTOS COM ESTOQUE BAIXO |-------------------\n");
     printf("Estoque minimo: %d\n\n", estoqueMinimo);
 
-    Produto * aux = inicioProduto;
+    Produto *aux = inicioProduto;
     int contador = 0;
 
     while(aux != NULL){
@@ -468,11 +455,11 @@ void consultarProdutoCodigo(int codTemp){
     printf("\n-------------------| CONSULTA DE PRODUTO |-------------------\n");
     printf("Consulta por codigo: %d\n\n", codTemp);
 
-    Produto * aux = buscarProduto(codTemp);
+    Produto *aux = buscarProduto(codTemp);
     if (aux == NULL) {
        printf("Produto inexistente.\n");
 
-    } else {
+    }else {
         printf("Codigo: %d \n", aux->codProduto);
         printf("Nome: %s \n", aux->nomeProduto);
         printf("Descricao: %s \n", aux->descricaoProduto);
@@ -538,7 +525,7 @@ void consultarProdutoNome(char *nome){
     }
 }
 
-// FUNCIONARIO
+// FUNCIONARIOS
 int cpfValido(char *cpf) {
     if (strlen(cpf) != 11)
         return 0;
@@ -549,6 +536,18 @@ int cpfValido(char *cpf) {
     }
 
     return 1;
+}
+
+Funcionario *buscarPorCodUsuario(int cod) {
+    Funcionario *aux = inicioFuncionario;
+
+    while (aux != NULL) {
+        if (aux->codUsuario == cod){
+            return aux;
+        }
+        aux = aux->prox;
+    }
+    return NULL;
 }
 
 Funcionario *buscarPorCPF(char *cpf) {
@@ -569,6 +568,12 @@ void addFuncionarios(char *cpf, char *nomeUsuario) {
 
     if (cpfValido(cpf) && buscarPorCPF(cpf) == NULL) {
         Funcionario *novo = malloc(sizeof(Funcionario));
+
+        if (novo == NULL) {
+            printf("Erro de memoria.\n");
+            return;
+        }
+
         novo->codUsuario = codFuncionario;
         strcpy(novo->cpf, cpf);
         strcpy(novo->nomeUsuario, nomeUsuario);
@@ -578,7 +583,7 @@ void addFuncionarios(char *cpf, char *nomeUsuario) {
         if (inicioFuncionario == NULL) { 
             inicioFuncionario = novo;
             fimFuncionario = novo;
-        } else { 
+        }else { 
             novo->ant = fimFuncionario;
             fimFuncionario->prox = novo;
             fimFuncionario = novo;
@@ -586,8 +591,8 @@ void addFuncionarios(char *cpf, char *nomeUsuario) {
         
         qtdFuncionarios++;
         codFuncionario++;
-        printf(">>> Cadastro realizado com sucesso! <<<\n");
-    } else {
+        printf(">>> Cadastro realizado com sucesso! Seu ID de Acesso: %d <<<\n", novo->codUsuario);
+    }else {
         printf("\nAVISO: Impossivel cadastrar usuario\n");
         printf("CPF invalido ou usuario ja cadastrado com esse CPF! Verifique e tente novamente.\n");
     }
@@ -600,7 +605,7 @@ void removerFuncionario(char *cpfBusca) {
         
         if (aux == NULL) {
             printf("Impossivel remover. Nao existe nenhum usuario com esse cpf!\n");
-        } else {
+        }else {
             int confirmacao;
             printf("\nFuncionario encontrado: %s\n", aux->nomeUsuario);
             printf("Tem certeza que deseja apagar este registro? (1 para Sim / 0 para Nao): ");
@@ -608,19 +613,19 @@ void removerFuncionario(char *cpfBusca) {
 
             if (confirmacao != 1) {
                 printf("Acao cancelada. O(a) funcionario(a) %s nao foi apagado(a).\n", aux->nomeUsuario);
-            } else {
+            }else {
                 if (inicioFuncionario == aux){
                     inicioFuncionario = aux->prox;
 
                     if(qtdFuncionarios == 1){
                         fimFuncionario = NULL;
-                    } else {
+                    }else {
                         inicioFuncionario->ant = NULL;
                     }
-                } else if (fimFuncionario == aux){
+                }else if (fimFuncionario == aux){
                     fimFuncionario = aux->ant;
                     fimFuncionario->prox = NULL;
-                } else {
+                }else {
                     aux->ant->prox = aux->prox; 
                     aux->prox->ant = aux->ant;  
                 }
@@ -630,7 +635,7 @@ void removerFuncionario(char *cpfBusca) {
                 printf("\n\nFuncionario com CPF %s removido com sucesso!\n", cpfBusca);
             }
         }
-    } else {
+    }else {
         printf("\nERRO: A lista de funcionarios esta vazia.\n");
     }
 }
@@ -641,7 +646,7 @@ void listarFuncionarios(){
     
     if (aux == NULL) {
         printf("Nenhum funcionario cadastrado.\n");
-    } else {
+    }else {
         while (aux != NULL) {
             printf("\nID: %d | CPF: %s | Nome: %s\n", aux->codUsuario, aux->cpf, aux->nomeUsuario);
             aux = aux->prox;
@@ -649,9 +654,13 @@ void listarFuncionarios(){
     }
 }
 
+// --- FUNCAO PARA UM USUARIO AO INICIAR PROGRAMA AQUI ---
+void cadastrarFuncionarioPadrao() {
+    addFuncionarios("12345678901", "Carlos Silva");
+}
+
 // GERENCIAMENTO
 void gerenciamentoFuncionarios(){
-
     int escolha;
     // gerenciamento de funcionarios
     char cpfTemp[12];
@@ -707,9 +716,9 @@ void gerenciamentoFuncionarios(){
                 break;
         }
 
-    } while (escolha != 0);
+    }while (escolha != 0);
 
-};
+}
 
 void gerenciamentoProdutos(){
     int escolha, subEscolha;
@@ -734,8 +743,7 @@ void gerenciamentoProdutos(){
             printf("Escolha uma opcao: ");
         }
 
-        switch (escolha)
-        {
+        switch (escolha) {
         case 1:{
             do {
                 printf("\n-------------------| LISTAGEM DE PRODUTOS |-------------------\n");
@@ -745,6 +753,7 @@ void gerenciamentoProdutos(){
                 printf("4. Retirar produto do estoque\n");
                 printf("0. Voltar\n\n");
                 printf("Escolha uma opcao: ");
+
                 while (scanf("%d", &subEscolha) != 1) {
                     printf("\nErro: Digite apenas numeros.\n");
 
@@ -753,17 +762,17 @@ void gerenciamentoProdutos(){
                     printf("Escolha uma opcao: ");
                 }
 
-                switch (subEscolha)
-                {
-                    int limInferior, limSuperior;
-                    case 1:
+                switch (subEscolha) {
+                    float limInferior, limSuperior;
+                    case 1:{
                         listarTodosProdutos();
+                        }
                         break;
 
-                    case 2:
+                    case 2:{
                         do {
                             printf("Digite o preco menor: ");
-                            if (scanf("%d", &limInferior) != 1) {
+                            if (scanf("%f", &limInferior) != 1) {
                                 printf("Erro: Digite apenas numeros.\n");
 
                                 while (getchar() != '\n'); 
@@ -773,7 +782,7 @@ void gerenciamentoProdutos(){
                         
                         do {  
                             printf("Digite o preco maior: ");
-                            if (scanf("%d", &limSuperior) != 1) {
+                            if (scanf("%f", &limSuperior) != 1) {
                                 printf("Erro: Digite apenas numeros.\n");
 
                                 while (getchar() != '\n'); 
@@ -783,12 +792,13 @@ void gerenciamentoProdutos(){
 
                         listarProdutosDisponiveisPreco(limInferior, limSuperior);
                         limInferior = 0, limSuperior = 0, subEscolha = -1;
+                        }
                         break;
 
-                    case 3: 
+                    case 3:{
                         do {
                             printf("Digite o codigo menor: ");
-                            if (scanf("%d", &limInferior) != 1) {
+                            if (scanf("%f", &limInferior) != 1) {
                                 printf("Erro: Digite apenas numeros.\n");
 
                                 while (getchar() != '\n'); // limpa o buffer
@@ -798,7 +808,7 @@ void gerenciamentoProdutos(){
                         
                         do {  
                             printf("Digite o codigo maior: ");
-                            if (scanf("%d", &limSuperior) != 1) {
+                            if (scanf("%f", &limSuperior) != 1) {
                                 printf("Erro: Digite apenas numeros.\n");
 
                                 while (getchar() != '\n'); 
@@ -809,10 +819,10 @@ void gerenciamentoProdutos(){
                         listarProdutosDisponiveisCodigo(limInferior, limSuperior);
                         limInferior = 0;
                         limSuperior = 0;
+                        }
                         break;
                         
-                    case 4:{
-                    // saida de estoque
+                    case 4:{ // saida de estoque
                         printf("\n-------------------| SAIDA DE ESTOQUE |-------------------\n");
 
                         int codTemp;
@@ -828,13 +838,18 @@ void gerenciamentoProdutos(){
                         saidaEstoque(codTemp);
                     }
                         break;
-
-                    default:
+                    
+                    case 0:{
+                        break;
+                    }
+                    
+                    default:{
                         printf("\nErro: escolha invalida! Escolha um numero de 0 a 4.\n");
                         break;
+                    }
                 }
             } while (subEscolha != 0);
-            }
+        }
             break;
 
         case 2: {
@@ -900,100 +915,103 @@ void gerenciamentoProdutos(){
         }
             break;
         
-        case 3: {
-            // consultar produto
+        case 3: { // consultar produto
             int codTemp;
             char buscaTemp[50];
 
             do {
-                    printf("\n-------------------| CONSULTA DE PRODUTOS |-------------------\n");
-                    printf("1. Pesquisar produtos\n");
-                    printf("2. Consultar por codigo\n");
-                    printf("3. Retirar produto do estoque\n");
-                    printf("0. Voltar\n\n");
-                    printf("Escolha uma opcao: ");
-                    while (scanf("%d", &subEscolha) != 1) {
-                        printf("\nErro: Digite apenas numeros.\n");
-
-                        while (getchar() != '\n');
-
-                        printf("Escolha uma opcao: ");
-                    }
+                printf("\n-------------------| CONSULTA DE PRODUTOS |-------------------\n");
+                printf("1. Pesquisar produtos\n");
+                printf("2. Consultar por codigo\n");
+                printf("3. Retirar produto do estoque\n");
+                printf("0. Voltar\n\n");
+                printf("Escolha uma opcao: ");
+                while (scanf("%d", &subEscolha) != 1) {
+                    printf("\nErro: Digite apenas numeros.\n");
 
                     while (getchar() != '\n');
 
-                    switch (subEscolha)
-                    {
-                        case 1:
-                            printf("Pesquisar por: ");
-                            fgets(buscaTemp, sizeof(buscaTemp), stdin);
-                            buscaTemp[strcspn(buscaTemp, "\n")] = '\0';
-
-                            consultarProdutoNome(buscaTemp);
-                            subEscolha = -1;
-                            break;
-
-                        case 2:
-                            do {
-                                printf("Digite o codigo: ");
-                                if (scanf("%d", &codTemp) != 1) {
-                                    printf("Erro: Digite apenas numeros.\n");
-
-                                    while (getchar() != '\n'); // limpa o buffer
-                                    codTemp = -1;          // força repetir o loop
-                                }
-                            } while (codTemp <=0);
-
-                            consultarProdutoCodigo(codTemp);
-                            codTemp = 0, subEscolha = -1;
-
-                            break;
-                        case 3:{
-                        // saida de estoque
-                            printf("\n-------------------| SAIDA DE ESTOQUE |-------------------\n");
-
-                            int codTemp;
-                
-                            printf("\nDigite o codigo do produto que deseja retirar: ");
-                            while (scanf("%d", &codTemp) != 1) {
-                                printf("\nErro: Digite apenas numeros.\n");
-
-                                while (getchar() != '\n');
-
-                                printf("Digite o codigo do produto que deseja retirar: ");
-                            }
-                            saidaEstoque(codTemp);
-                        }
-                            break;
-
-                        default:
-                            printf("\nErro: escolha invalida! Escolha um numero de 0 a 3.\n");
-                            break;
-                    }
-                } while (subEscolha != 0);
-            }
-            break;
-        
-        case 4: {
-        // atualizar estoque
-            printf("\n-------------------| ATUALIZACAO DE ESTOQUE |-------------------\n");
-            int codTemp;
-
-            printf("\nDigite o codigo do produto que pretende alterar a quantidade: ");
-            while (scanf("%d", &codTemp) != 1) {
-                printf("\nErro: Digite apenas numeros.\n");
+                    printf("Escolha uma opcao: ");
+                }
 
                 while (getchar() != '\n');
 
-                printf("Digite o codigo do produto que pretende alterar a quantidade: ");
-            }
+                switch (subEscolha) {
+                    case 1:
+                        printf("Pesquisar por: ");
+                        fgets(buscaTemp, sizeof(buscaTemp), stdin);
+                        buscaTemp[strcspn(buscaTemp, "\n")] = '\0';
 
-            atualizarEstoqueProduto(codTemp);
+                        consultarProdutoNome(buscaTemp);
+                        subEscolha = -1;
+                        break;
+
+                    case 2:
+                        do {
+                            printf("Digite o codigo: ");
+                            if (scanf("%d", &codTemp) != 1) {
+                                printf("Erro: Digite apenas numeros.\n");
+
+                                while (getchar() != '\n'); // limpa o buffer
+                                codTemp = -1;          // força repetir o loop
+                            }
+                        } while (codTemp <=0);
+
+                        consultarProdutoCodigo(codTemp);
+                        codTemp = 0, subEscolha = -1;
+
+                        break;
+
+                    case 3:{ // saida de estoque
+                        printf("\n-------------------| SAIDA DE ESTOQUE |-------------------\n");
+
+                        int codTemp;
+            
+                        printf("\nDigite o codigo do produto que deseja retirar: ");
+                        while (scanf("%d", &codTemp) != 1 || codTemp <= 0) {
+                            printf("\nErro: Digite apenas numeros.\n");
+
+                            while (getchar() != '\n');
+
+                            printf("Digite o codigo do produto que deseja retirar: ");
+                        }
+                        saidaEstoque(codTemp);
+                    }
+                        break;
+                    
+                    case 0:{
+                        printf("\nVoltando...\n");
+                    }
+                    
+                    break;
+
+                    default:
+                        printf("\nErro: escolha invalida! Escolha um numero de 0 a 3.\n");
+                        break;
+                }
+            }while (subEscolha != 0);
+        }
+        break;
+    
+        case 4: { // atualizar estoque
+            printf("\n-------------------| ATUALIZACAO DE ESTOQUE |-------------------\n");
+            int codTemp;
+
+            printf("\nDigite o codigo do produto que deseja adicionar estoque: ");
+
+            while (scanf("%d", &codTemp) != 1 || codTemp <= 0) {
+                printf("\nErro: Digite um codigo positivo.\n");
+
+                while (getchar() != '\n');
+
+                printf("Digite o codigo do produto que deseja retirar: ");
             }
+            
+            atualizarEstoqueProduto(codTemp);
+        }
             break;
 
-        case 5: {
-        // saida de estoque
+        case 5: { // saida de estoque
             printf("\n-------------------| SAIDA DE ESTOQUE |-------------------\n");
 
             int codTemp;
@@ -1010,22 +1028,21 @@ void gerenciamentoProdutos(){
         }
             break;
 
-        case 6:
-        // relatorio de inventario
+        case 6:{ // relatorio de inventario
             relatorioInventario();
+        }
             break;
 
-        case 7:
-        // produtos com estoque baixo
+        case 7:{ // produtos com estoque baixo
             produtosEstoqueBaixo();
+        }
             break;
 
-        case 8:{
-        // remover produto permanentemente
-            int codTemp;
-                
+        case 8:{ // remover produto permanentemente
+            int codTemp;    
             printf("Digite o codigo do produto que deseja remover permanentemente: ");
-            while (scanf("%d", &codTemp) != 1) {
+
+            while (scanf("%d", &codTemp) != 1 || codTemp <= 0) {
                 printf("\nErro: Digite apenas numeros.\n");
 
                 while (getchar() != '\n');
@@ -1036,18 +1053,24 @@ void gerenciamentoProdutos(){
         }
             break;
 
-        default:
+        case 0:{
+            printf("\nVoltando...\n");
+        }
+        break;
+
+        default:{
             printf("\nErro: escolha invalida! Escolha um numero de 0 a 8.\n");
+        }
             break;
         }
-    } while (escolha != 0);
-    
-};
+    }while (escolha != 0);
+}
 
 int main() {
     int opcao;
 
     carregarArquivo(); 
+    cadastrarFuncionarioPadrao();
 
     do {
         printf("\n-------------------| MENU SISTEMA |-------------------\n");
@@ -1065,24 +1088,46 @@ int main() {
         }
 
         switch (opcao) {
-        case 1:
-            // gerenciar produtos 
-            gerenciamentoProdutos();
-            break;
-        case 2:
-            // gerenciar usuarios
-            gerenciamentoFuncionarios();
-            break;
-        case 0:
-            salvarArquivo(); 
-            printf("\n-------------------| SISTEMA ENCERRADO |-------------------\n");
-            printf("\nAte breve!\n");
-            break;
-        default:
-            printf("\nErro: escolha invalida! Escolha um numero de 0 a 2.\n");
-            break;
+            case 1: {
+                if (inicioFuncionario == NULL) {
+                printf("\n[ACESSO NEGADO] Nenhum funcionario cadastrado no sistema.\n");
+                printf("Va em 'Gerenciar funcionarios' e cadastre-se primeiro.\n");
+                }else {
+                    int codAcesso;
+                    printf("\n-------------------| LOGIN |-------------------\n");
+                    printf("Digite o seu ID de Funcionario: ");
+                
+                    while (scanf("%d", &codAcesso) != 1) {
+                        printf("\nErro: Digite apenas numeros.\n");
+                        while (getchar() != '\n');
+                        printf("Digite o seu ID de Funcionario: ");
+                    }
+
+                    Funcionario *usuarioLogado = buscarPorCodUsuario(codAcesso);
+
+                    if (usuarioLogado != NULL) {
+                        printf("\n>>> Acesso Permitido. Bem-vindo(a), %s! <<<\n", usuarioLogado->nomeUsuario);
+                        gerenciamentoProdutos(); // Só chama o menu se o login der certo
+                    }else {
+                        printf("\n[ACESSO NEGADO] Funcionario com ID %d nao encontrado.\n", codAcesso);
+                    }
+                }
+                break;
+            }
+            case 2:
+                // gerenciar usuarios
+                gerenciamentoFuncionarios();
+                break;
+            case 0:
+                salvarArquivo(); 
+                printf("\n-------------------| SISTEMA ENCERRADO |-------------------\n");
+                printf("\nAte breve!\n");
+                break;
+            default:
+                printf("\nErro: escolha invalida! Escolha um numero de 0 a 2.\n");
+                break;
         }
-    } while (opcao != 0);
+    }while (opcao != 0);
     
     return 0;
 }
