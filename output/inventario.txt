@@ -5,9 +5,10 @@
 246;Cajuina Sao Geraldo;1L;8.90;12
 325;Refrigerante Fanta Laranja;2L;9.50;10
 438;Cha Gelado Leao Pessego;1,5L;7.20;6
-456;Refrigerante Guarana;1L;7.90;2
+456;Refrigerante Guarana;1L;7.90;5
 547;Agua com Gas Sao Lourenco;500ml;3.90;18
 569;Energetico RedBull;463ml;18.00;9
+594;Agua Mineral C/ gas ;500ml;4.00;4
 612;Suco Tampico Laranja;1L;6.50;11
 703;Isotonico Gatorade Limao;500ml;5.80;14
 789;Refrigerante Spritt;2L;8.90;7
@@ -15,4 +16,4 @@
 824;Agua Mineral Crystal;1,5L;4.50;20
 915;Refrigerante Pepsi;2L;9.80;9
 951;Energetico Monster;453ml;12.40;8
-986;Energetico TNT;473ml;9.90;13
+986;Energetico TNT;473ml;9.90;2

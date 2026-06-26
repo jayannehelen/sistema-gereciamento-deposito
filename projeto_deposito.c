@@ -34,33 +34,6 @@ int qtdFuncionarios = 0;
 int codFuncionario = 1;
 int estoqueMinimo = 2;
 
-void inserirProdutoLista(Produto *novo){
-    if(inicioProduto == NULL){ 
-        inicioProduto = novo;
-        fimProduto = novo;
-    }else{ 
-        if (novo->codProduto < inicioProduto->codProduto) { 
-            inicioProduto->ant = novo; 
-            novo->prox = inicioProduto;
-            inicioProduto = novo;
-        }else if (novo->codProduto >= fimProduto->codProduto) { 
-            fimProduto->prox = novo;
-            novo->ant = fimProduto;
-            fimProduto = novo;
-        }else { 
-            Produto *aux = inicioProduto->prox;
-            while(aux != NULL && novo->codProduto >= aux->codProduto){
-                aux = aux->prox;
-            }
-            aux->ant->prox = novo;
-            novo->prox = aux;
-            novo->ant = aux->ant;
-            aux->ant = novo;
-        }
-    }
-    qtdProdutosEstoque++;
-}
-
 // --- PROTOTIPOS DE ARQUIVO ---
 void salvarArquivo();
 void carregarArquivo();
@@ -144,6 +117,33 @@ Produto *buscarProduto(int cod) {
 }
 
 // CRUD PRODUTO
+void inserirProdutoLista(Produto *novo){
+    if(inicioProduto == NULL){ 
+        inicioProduto = novo;
+        fimProduto = novo;
+    }else{ 
+        if (novo->codProduto < inicioProduto->codProduto) { 
+            inicioProduto->ant = novo; 
+            novo->prox = inicioProduto;
+            inicioProduto = novo;
+        }else if (novo->codProduto >= fimProduto->codProduto) { 
+            fimProduto->prox = novo;
+            novo->ant = fimProduto;
+            fimProduto = novo;
+        }else { 
+            Produto *aux = inicioProduto->prox;
+            while(aux != NULL && novo->codProduto >= aux->codProduto){
+                aux = aux->prox;
+            }
+            aux->ant->prox = novo;
+            novo->prox = aux;
+            novo->ant = aux->ant;
+            aux->ant = novo;
+        }
+    }
+    qtdProdutosEstoque++;
+}
+
 void cadastrarProdutoEstoque(int cod, char *nome, char *descricao, float preco, int quantidade){   
     printf("\n-------------------| ADICIONAR NO ESTOQUE |-------------------\n");
 
@@ -1090,8 +1090,8 @@ int main() {
         switch (opcao) {
             case 1: {
                 if (inicioFuncionario == NULL) {
-                printf("\n[ACESSO NEGADO] Nenhum funcionario cadastrado no sistema.\n");
-                printf("Va em 'Gerenciar funcionarios' e cadastre-se primeiro.\n");
+                    printf("\n[ACESSO NEGADO] Nenhum funcionario cadastrado no sistema.\n");
+                    printf("Va em 'Gerenciar funcionarios' e cadastre-se primeiro.\n");
                 }else {
                     int codAcesso;
                     printf("\n-------------------| LOGIN |-------------------\n");
